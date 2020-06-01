@@ -1,0 +1,111 @@
+<html>
+
+<head>
+    <title>YoVoice!</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
+    <link rel="stylesheet" href="yo.css">
+</head>
+
+<body>
+    <div class="container">
+        <h1>YoVoice!</h1>
+        <p>is a great way to call your friend and tell him about the stuff no one cares about through this sick app
+            without censorship and
+            interference. <br />
+            <br />If this one doesn't work. use : <a href="https://arthsaysyo.surge.sh">YoVoice using WebRTC SDK!</a>it's even better!</p>
+        <p>YoVoice can be used by all sorts of people. It's real time VoIP yo! I'm not entirely sure why I made this
+            tho. Bleh!
+          <p>  How does this work?
+            You shouldn't be here if this is a legit question of yours.</p>
+        </p>
+        <address>Show your support by not being a sheep :)</address>
+        <input type="text" id="callings"></input>
+        <button class="button-call" onclick="call()">Call</button>
+        <audio controls></audio>
+        <div class="answerer-code">
+            <button class="button-answ" onclick="answerer()">Get the answerer code and wait for a sec.</button>
+            <div id="peerid"></div>
+        </div>
+        <div class="bottom-space"></div>
+        Listen to this while you wait for that call! and check out <a href="arthtyagi.me/newmusic">music related stuff I
+            made :)</a>
+        <iframe src="https://open.spotify.com/embed/track/7FIWs0pqAYbP91WWM0vlTQ" width="300" height="380"
+            frameborder="0" allowtransparency="true" allow="encrypted-media"></iframe>
+    </div>
+    <span class="credits"> Yooo I just tried PeerJS! xD, I'm<a href="https://github.com/arthtyagi/">Arth btw.</a>.
+        <script src="https://unpkg.com/peerjs@1.2.0/dist/peerjs.min.js"></script>
+        <script>
+            //var getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
+            //console.log(getUserMedia);
+
+            var getUserMedia = (function () {
+                if (navigator.getUserMedia) {
+                    return navigator.getUserMedia.bind(navigator)
+                }
+                if (navigator.webkitGetUserMedia) {
+                    return navigator.webkitGetUserMedia.bind(navigator)
+                }
+                if (navigator.mozGetUserMedia) {
+                    return navigator.mozGetUserMedia.bind(navigator)
+                }
+            })();
+
+            function onReceiveStream(stream) {
+                var audio = document.querySelector('audio');
+                console.log(audio);
+                audio.srcObject = stream;
+                audio.onloadedmetadata = function (e) {
+                    console.log('now playing the audio');
+                    audio.play();
+                }
+            }
+
+            function call() {
+                var person_to_call = document.getElementById('callings').value;
+                console.log('WE IS CALLINNNN BRO ' + person_to_call);
+                var peer = new Peer();
+                getUserMedia({
+                    video: false,
+                    audio: true
+                }, function (stream) {
+                    var call = peer.call(person_to_call, stream);
+                    call.on('stream', function (remoteStream) {
+                        console.log(remoteStream);
+                        onReceiveStream(remoteStream);
+                        // Show stream in some video/canvas element.
+                    });
+                }, function (err) {
+                    console.log('Failed to get local stream', err);
+                });
+
+            }
+
+            function answerer() {
+                var peer = new Peer();
+                peer.on('open', (id) => {
+                    document.getElementById('peerid').innerHTML = id;
+                });
+                peer.on('call', function (call) {
+                    getUserMedia({
+                        video: false,
+                        audio: true
+                    }, function (stream) {
+                        console.log("WE IS GETTIN CALLEDDDD");
+                        call.answer(stream); // Answer the call with an A/V stream.
+                        call.on('stream', function (remoteStream) {
+                            console.log(remoteStream);
+                            onReceiveStream(remoteStream);
+                            // Show stream in some video/canvas element.
+                        });
+                    }, function (err) {
+                        console.log('Failed to get local stream', err);
+                    });
+                });
+            }
+        </script>
+
+</body>
+
+</html>
